@@ -9,6 +9,7 @@ Interface Smart TV pour Raspberry Pi 4, construite avec Electron. Elle démarre 
 ## Fonctionnalités
 
 - **Accueil cinéma** : bandeau des films de la médiathèque Jellyfin (7 titres tirés au sort chaque jour, défilement automatique), rangée « Continuer » avec la progression de lecture, lecture directe depuis l'accueil.
+- **Tuiles uniformes** : « Continuer », applications et jeux partagent une même case 16:9, cinq par ligne. Chaque service affiche son logo complet sur la couleur de sa marque, et un point vert signale une application déjà ouverte.
 - **Applications persistantes** : Jellyfin, YouTube, Spotify, Twitch, Netflix, un dashboard et Immich s'ouvrent chacun dans leur propre vue, avec leur session conservée. Les applications les moins récentes sont fermées au-delà d'une limite réglable (2 à 6) pour ménager la mémoire du Pi.
 - **Raccourcis personnalisés** : ajout d'un site par son URL, icône récupérée automatiquement.
 - **Jeux Moonlight** : liste des jeux publiés par le PC (Sunshine / GameStream) et lancement natif de `moonlight-qt`, avec clavier virtuel pendant le stream.
@@ -101,4 +102,4 @@ Ouvrir `demo.html` dans Chrome ou Edge : l'interface se charge avec `demo/mock-r
 
 ## Licences des ressources
 
-Les polices DM Sans et Space Grotesk sont distribuées sous licence SIL Open Font. Les logos des services (YouTube, Spotify, Twitch, Netflix, Jellyfin, Immich, Dashy) appartiennent à leurs propriétaires respectifs et ne servent qu'à identifier les tuiles.
+Les polices DM Sans et Space Grotesk sont distribuées sous licence SIL Open Font. Les logos des services (YouTube, Spotify, Twitch, Netflix, Jellyfin, Immich, Dashy) appartiennent à leurs propriétaires respectifs et ne servent qu'à identifier les tuiles. Les logos complets de `assets/logos/` proviennent de Wikimedia Commons (YouTube, Netflix, Spotify, Twitch) et des dépôts officiels des projets : Jellyfin (`jellyfin/jellyfin-ux`, CC BY-SA 4.0) et Immich (`immich-app/immich`). Les logos Spotify et Twitch ont été recolorés pour leur fond de marque.

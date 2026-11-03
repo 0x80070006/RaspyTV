@@ -25,7 +25,8 @@
     ['youtube', 'YouTube', 'assets/icons/youtube.svg', '#ff244a'], ['spotify', 'Spotify', 'assets/icons/spotify.svg', '#1ed760'],
     ['twitch', 'Twitch', 'assets/icons/twitch.svg', '#a970ff'], ['netflix', 'Netflix', 'assets/icons/netflix.svg', '#e50914'],
     ['homelab', 'Dashboard', 'assets/icons/dashy.png', '#00e5d0'], ['immich', 'Immich', 'assets/icons/immich.png', '#fa2921'],
-  ].map(([id, name, icon, color]) => ({ id, name, icon, color, url: 'https://example.com/', native: true, open: false }));
+  ].map(([id, name, icon, color]) => ({ id, name, icon, color, url: 'https://example.com/', native: true, open: id === 'youtube' }));
+  apps.push({ id: 'custom-demo', name: 'Ma radio', icon: null, color: '#ff8a3d', url: 'https://example.com/', native: false, open: false });
   const config = { theme: 'dark', background: 'color:#000000', clock24: true, sounds: false, soundVolume: 45, reducedMotion: false, showWeather: true, showClock: true, showSpotify: true, showRecent: true, maxResidentApps: 4, appOrder: apps.map(app => app.id), shortcuts: [], recent: [] };
   const state = { config, apps, activeId: null, nativeMode: false, artMode: false, site: { weatherLabel: 'Paris', moonlight: true } };
   const listeners = { state: [], navigate: [] };
