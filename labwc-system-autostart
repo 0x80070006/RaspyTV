@@ -1,0 +1,3 @@
+#!/bin/sh
+# Le bureau PCManFM, le panneau et l'autostart XDG sont volontairement
+# désactivés : la session graphique est exclusivement dédiée à RaspyTV.

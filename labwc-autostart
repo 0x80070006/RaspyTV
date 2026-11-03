@@ -1,0 +1,8 @@
+#!/bin/sh
+# Session kiosk RaspyTV : le compositeur démarre directement l'interface,
+# sans bureau PCManFM ni panneau intermédiaire.
+# Copier vers ~/.config/labwc/autostart ; RASPYTV_DIR pointe vers ce dépôt.
+RASPYTV_DIR="${RASPYTV_DIR:-$HOME/MediaHub}"
+/usr/bin/swaybg -i "$RASPYTV_DIR/assets/raspytv-boot.png" -m fill &
+/usr/bin/kanshi &
+"$RASPYTV_DIR/start-kiosk.sh" &

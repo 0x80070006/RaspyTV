@@ -1,0 +1,5 @@
+.art-gallery{position:fixed;inset:0;z-index:1000;background:#000;opacity:0;transition:opacity 500ms ease;cursor:none;outline:none;overflow:hidden}
+.art-gallery.visible{opacity:1}
+.art-gallery img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;transition:opacity 850ms ease;pointer-events:none}
+.art-gallery img.visible{opacity:1}
+@media(prefers-reduced-motion:reduce){.art-gallery,.art-gallery img{transition-duration:150ms}}

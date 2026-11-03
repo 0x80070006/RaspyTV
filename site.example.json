@@ -1,0 +1,12 @@
+{
+  "jellyfinUrl": "http://jellyfin.local:8096",
+  "jellyfinRemoteUrl": "",
+  "lumoPath": "/web/cinematic/index.html#home",
+  "moonlightHost": "",
+  "dashboardUrl": "",
+  "immichUrl": "",
+  "weatherLatitude": 48.8566,
+  "weatherLongitude": 2.3522,
+  "weatherLabel": "Paris",
+  "timezone": "Europe/Paris"
+}

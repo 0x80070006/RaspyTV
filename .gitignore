@@ -1,0 +1,10 @@
+node_modules/
+__pycache__/
+*.bak-*
+backups/
+site.json
+*.log
+assets/art/*
+!assets/art/.gitkeep
+assets/backgrounds/*
+!assets/backgrounds/.gitkeep

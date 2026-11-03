@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Raspy TV
+Comment=Interface Smart TV Electron
+Exec=/usr/bin/npm --prefix @APP_DIR@ start
+Path=@APP_DIR@
+Terminal=false
+X-GNOME-Autostart-enabled=true
+StartupNotify=false
