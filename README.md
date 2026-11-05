@@ -8,8 +8,8 @@ Interface Smart TV pour Raspberry Pi 4, construite avec Electron. Elle démarre 
 
 ## Fonctionnalités
 
-- **Accueil cinéma** : bandeau des films de la médiathèque Jellyfin (7 titres tirés au sort chaque jour, défilement automatique), rangée « Continuer » avec la progression de lecture, lecture directe depuis l'accueil.
-- **Tuiles uniformes** : « Continuer », applications et jeux partagent une même case 16:9, cinq par ligne. Chaque service affiche son logo complet sur la couleur de sa marque, et un point vert signale une application déjà ouverte.
+- **Accueil cinéma** : bandeau des films de la médiathèque Jellyfin (7 titres tirés au sort chaque jour, défilement automatique), rangées « Continuer » (avec la progression de lecture) et « Récemment ajoutés », lecture directe depuis l'accueil.
+- **Tuiles uniformes** : « Continuer », « Récemment ajoutés », applications et jeux partagent une même case 16:9, cinq par ligne. Chaque service affiche son logo complet sur la couleur de sa marque, et un point vert signale une application déjà ouverte.
 - **Applications persistantes** : Jellyfin, YouTube, Spotify, Twitch, Netflix, un dashboard et Immich s'ouvrent chacun dans leur propre vue, avec leur session conservée. Les applications les moins récentes sont fermées au-delà d'une limite réglable (2 à 6) pour ménager la mémoire du Pi.
 - **Raccourcis personnalisés** : ajout d'un site par son URL, icône récupérée automatiquement.
 - **Jeux Moonlight** : liste des jeux publiés par le PC (Sunshine / GameStream) et lancement natif de `moonlight-qt`, avec clavier virtuel pendant le stream.
@@ -71,8 +71,6 @@ Les adresses réseau et la localisation ne sont pas dans le code. Elles se règl
 | Clé | Rôle |
 | --- | --- |
 | `jellyfinUrl` | Serveur Jellyfin sur le réseau local (accueil, « Continuer », lecture). |
-| `jellyfinRemoteUrl` | Adresse alternative du même serveur (par exemple via VPN), facultative. |
-| `lumoPath` | Chemin du client web Jellyfin ouvert par la tuile Lumo. |
 | `moonlightHost` | Adresse du PC de jeu ; vide pour désactiver les jeux. |
 | `dashboardUrl`, `immichUrl` | Tuiles facultatives ; une URL vide masque la tuile. |
 | `weatherLatitude`, `weatherLongitude`, `weatherLabel`, `timezone` | Météo Open-Meteo et fuseau horaire. |

@@ -32,15 +32,14 @@ const MOONLIGHT_BIN = '/usr/bin/moonlight-qt';
 const SITE_FILE = path.join(DATA_DIR, 'site.json');
 // Network addresses and location live outside the repository, in ~/.config/raspy-tv/site.json
 // (see site.example.json). An empty URL hides the matching tile.
-const SITE_DEFAULTS = { jellyfinUrl: 'http://jellyfin.local:8096', jellyfinRemoteUrl: '', lumoPath: '/web/cinematic/index.html#home', moonlightHost: '', dashboardUrl: '', immichUrl: '', weatherLatitude: 48.8566, weatherLongitude: 2.3522, weatherLabel: 'Paris', timezone: 'Europe/Paris' };
+const SITE_DEFAULTS = { jellyfinUrl: 'http://jellyfin.local:8096', moonlightHost: '', dashboardUrl: '', immichUrl: '', weatherLatitude: 48.8566, weatherLongitude: 2.3522, weatherLabel: 'Paris', timezone: 'Europe/Paris' };
 function loadSite() { try { return { ...SITE_DEFAULTS, ...JSON.parse(fs.readFileSync(SITE_FILE, 'utf8')) }; } catch { return { ...SITE_DEFAULTS }; } }
 const SITE = loadSite();
 const JELLYFIN = new URL(SITE.jellyfinUrl).origin;
-const JELLYFIN_HOSTS = new Set([SITE.jellyfinUrl, SITE.jellyfinRemoteUrl].filter(Boolean).map(url => new URL(url).hostname.toLowerCase()));
+const JELLYFIN_HOSTS = new Set([new URL(SITE.jellyfinUrl).hostname.toLowerCase()]);
 const MOONLIGHT_HOST = SITE.moonlightHost;
 const DEFAULT_APPS = [
-  { id: 'jellyfin', name: 'Lumo', url: `${JELLYFIN}${SITE.lumoPath}`, icon: 'assets/icons/lumo.png', color: '#d3a13a', description: 'Ta médiathèque' },
-  { id: 'jellyfin-web', name: 'Jellyfin', url: `${SITE.jellyfinRemoteUrl ? new URL(SITE.jellyfinRemoteUrl).origin : JELLYFIN}/web/#/home`, icon: 'assets/icons/jellyfin.svg', color: '#a855f7', description: 'Interface Jellyfin officielle' },
+  { id: 'jellyfin', name: 'Jellyfin', url: `${JELLYFIN}/web/#/home`, icon: 'assets/icons/jellyfin.svg', color: '#a855f7', description: 'Ta médiathèque' },
   { id: 'youtube', name: 'YouTube', url: 'https://www.youtube.com/', icon: 'assets/icons/youtube.svg', color: '#ff244a', description: 'Vidéos et musique' },
   { id: 'spotify', name: 'Spotify', url: 'https://open.spotify.com/', icon: 'assets/icons/spotify.svg', color: '#1ed760', description: 'Musique et podcasts' },
   { id: 'twitch', name: 'Twitch', url: 'https://www.twitch.tv/', icon: 'assets/icons/twitch.svg', color: '#a970ff', description: 'Live et gaming' },
@@ -53,6 +52,7 @@ let artMode = false;
 let mainWindow, splashWindow, navWindow, keyboardView, keyboardTarget, loadingView, moonlightOverlay, squeekboardProcess, layerNavProcess, navControlServer, quitting = false, activeId = null, config, views = new Map(), navShown = false, navTimer, navInputTimer, keyboardShown = false, keyboardHideTimer, systemKeyboardVisible = false, heroCache = null, heroCacheAt = 0, heroCacheDay = '', jellyfinAuthHeader = '', jellyfinVault = null, nativeProcess = null, moonlightCache = null, moonlightCacheAt = 0, moonlightRequest = null, systemVolume = null, loadingTimer = null, loadingShownAt = 0;
 const viewLastUsed = new Map();
 const adapterCssKeys = new WeakMap();
+const viewLoads = new WeakMap();
 const configuredSessions = new Set();
 
 function ensureDirs() { [DATA_DIR, ICON_DIR, LOG_DIR].forEach(dir => { fs.mkdirSync(dir, { recursive: true, mode: 0o700 }); try { fs.chmodSync(dir, 0o700); } catch {} }); }
@@ -211,13 +211,13 @@ function stopNativeMoonlight() {
     try { process.kill(-child.pid, 'SIGTERM'); } catch { try { child.kill('SIGTERM'); } catch {} }
   }
   // Also stop an orphaned Qt client. This covers a stream that outlived its
-  // tracked launcher and prevents its audio continuing behind Lumo/home.
+  // tracked launcher and prevents its audio continuing behind Jellyfin/home.
   execFile('/usr/bin/pkill', ['-TERM', '-x', 'moonlight-qt'], error => {
     if (error && error.code !== 1) log(`moonlight cleanup failure ${error.message}`);
   });
   hideMoonlightOverlay();
 }
-function showHome() { const refreshJellyfin = activeId === 'jellyfin' || activeId === 'jellyfin-web'; showLoading('Accueil RaspyTV'); stopNativeMoonlight(); hideKeyboard(); pauseActiveMedia(); activeId = null; if (refreshJellyfin) { heroCache = null; heroCacheAt = 0; } hideAllViews(); restoreShellFullscreen(); mainWindow.webContents.focus(); emitState(); hideLoadingSoon(120); }
+function showHome() { const refreshJellyfin = activeId === 'jellyfin'; showLoading('Accueil RaspyTV'); stopNativeMoonlight(); hideKeyboard(); pauseActiveMedia(); activeId = null; if (refreshJellyfin) { heroCache = null; heroCacheAt = 0; } hideAllViews(); restoreShellFullscreen(); mainWindow.webContents.focus(); emitState(); hideLoadingSoon(120); }
 function leaveNativeForApp() { stopNativeMoonlight(); restoreShellFullscreen(); }
 
 function parseCsvLine(line) {
@@ -318,7 +318,7 @@ function keepJellyfinSession(serviceSession) {
   serviceSession.cookies.get({}).then(cookies => Promise.all(cookies.map(promote))).catch(error => log(`jellyfin cookie scan failure ${error.message}`));
 }
 async function loadServiceContent(view, service) {
-  const jellyfin = service.id === 'jellyfin' || service.id === 'jellyfin-web';
+  const jellyfin = service.id === 'jellyfin';
   const origin = new URL(service.url).origin;
   try {
     if (jellyfin && jellyfinVault) {
@@ -338,7 +338,7 @@ async function loadServiceContent(view, service) {
 function createServiceView(service) {
   const partition = `persist:raspy-tv-${service.id}`;
   const serviceSession = session.fromPartition(partition);
-  const jellyfin = service.id === 'jellyfin' || service.id === 'jellyfin-web';
+  const jellyfin = service.id === 'jellyfin';
   if (jellyfin) keepJellyfinSession(serviceSession);
   maintainSessionCache(serviceSession, service.id);
   serviceSession.setPermissionRequestHandler((_webContents, permission, callback) => callback(permission === 'fullscreen'));
@@ -351,7 +351,7 @@ function createServiceView(service) {
     if (input.type !== 'keyDown' || (input.key !== 'Escape' && input.key !== 'Home')) return;
     event.preventDefault();
     if (service.id === 'jellyfin' && input.key === 'Escape') {
-      view.webContents.executeJavaScript(`typeof window.__cinematicClosePlayer==='function'&&window.__cinematicClosePlayer(true)`, true)
+      view.webContents.executeJavaScript(`(()=>{if(!location.hash.startsWith('#/video')&&!document.querySelector('video.htmlvideoplayer'))return false;history.back();return true})()`, true)
         .then(closed => { if (!closed) showHome(); })
         .catch(showHome);
       return;
@@ -366,7 +366,7 @@ function createServiceView(service) {
   if (jellyfin) view.webContents.on('did-navigate-in-page', () => setTimeout(() => captureJellyfinStorage(view, service), 1200));
   view.webContents.on('console-message', (_event, level, message) => { const text = typeof level === 'object' ? level.message : message; if (text === '__RASPY_OSK_OPEN__') showKeyboard(view.webContents); else if (text === '__RASPY_OSK_CLOSE__') hideKeyboardSoon(view.webContents); });
   view.webContents.on('will-navigate', (event, url) => { if (!validUrl(url)) event.preventDefault(); });
-  loadServiceContent(view, service);
+  viewLoads.set(view, loadServiceContent(view, service));
   return view;
 }
 function launch(serviceId) { const service = allApps().find(a => a.id === serviceId); if (!service) throw new Error('Application inconnue'); showLoading(service.name); leaveNativeForApp(); hideKeyboard(); if (activeId && activeId !== serviceId) pauseActiveMedia(); let view = views.get(service.id); if (!view) { evictInactiveViews(service.id); view = createServiceView(service); views.set(service.id, view); log(`opened ${service.id}`); } hideAllViews(); view.webContents.setAudioMuted(false); view.setBounds(viewBounds()); showLoading(service.name); raiseNav(); activeId = service.id; viewLastUsed.set(service.id, Date.now()); config.recent = [service.id, ...config.recent.filter(x => x !== service.id)].slice(0, 12); saveConfig(); view.webContents.focus(); if (!view.webContents.isLoading()) hideLoadingSoon(100); }
@@ -377,7 +377,7 @@ async function jellyfinHero(force = false) {
   const helper = new BrowserWindow({ show: false, webPreferences: { partition: 'persist:raspy-tv-jellyfin', contextIsolation: true, nodeIntegration: false, sandbox: true } });
   try {
     maintainSessionCache(helper.webContents.session, 'jellyfin');
-    // Load a tiny same-origin JSON page: localStorage stays accessible without booting the full Cinematic client.
+    // Load a tiny same-origin JSON page: localStorage stays accessible without booting the full web client.
     await helper.loadURL(`${JELLYFIN}/System/Info/Public`);
     await restoreJellyfinStorage(helper.webContents, JELLYFIN).catch(() => false);
     const result = await helper.webContents.executeJavaScript(`(async()=>{try{
@@ -395,7 +395,9 @@ async function jellyfinHero(force = false) {
       const recent=await recentResponse.json(),resume=resumeResponse.ok?await resumeResponse.json():{Items:[]},image=(x,type,width)=>location.origin+'/Items/'+x.Id+'/Images/'+type+(type==='Backdrop'?'/0':'')+'?maxWidth='+width+'&quality=76';
       const items=(recent.Items||[]).filter(x=>x.BackdropImageTags?.length).map(x=>({id:x.Id,name:x.Name,overview:x.Overview||'',year:x.ProductionYear||'',rating:x.CommunityRating?Number(x.CommunityRating).toFixed(1):'',runtime:x.RunTimeTicks?Math.round(x.RunTimeTicks/600000000):'',backdrop:image(x,'Backdrop',1400)}));
       const continueItems=(resume.Items||[]).slice(0,8).map(x=>({id:x.Id,name:x.Name,subtitle:x.Type==='Episode'?[x.SeriesName,'S'+(x.ParentIndexNumber||0)+' E'+(x.IndexNumber||0)].filter(Boolean).join(' · '):(x.ProductionYear||'Film'),progress:Math.max(0,Math.min(100,Number(x.UserData?.PlayedPercentage||0))),image:x.BackdropImageTags?.length?image(x,'Backdrop',640):x.ImageTags?.Primary?image(x,'Primary',500):''}));
-      return{items,continueItems,needsLogin:false,authorization,session:{token:selected.token,userId:selected.userId}}
+      const addedResponse=await fetch('/Items?'+query+'&Recursive=true&IncludeItemTypes=Movie&SortBy=DateCreated,SortName&SortOrder=Descending&Limit=20&Fields='+fields+'&ImageTypeLimit=1&EnableImageTypes=Backdrop,Primary',{headers,cache:'no-store'}),added=addedResponse.ok?await addedResponse.json():{Items:[]};
+      const recentItems=(added.Items||[]).map(x=>({id:x.Id,name:x.Name,subtitle:x.ProductionYear||'Film',progress:Math.max(0,Math.min(100,Number(x.UserData?.PlayedPercentage||0))),image:x.BackdropImageTags?.length?image(x,'Backdrop',640):x.ImageTags?.Primary?image(x,'Primary',500):''}));
+      return{items,continueItems,recentItems,needsLogin:false,authorization,session:{token:selected.token,userId:selected.userId}}
     }catch(error){return{items:[],continueItems:[],error:error.message}}})()`, true);
     if (result.authorization) jellyfinAuthHeader = result.authorization;
     if (result.session) { const valid = await validateJellyfinCandidate(result.session, JELLYFIN); if (valid) saveJellyfinVault(valid); }
@@ -409,9 +411,12 @@ async function jellyfinHero(force = false) {
 async function playJellyfin(itemId) {
   if (!/^[a-f0-9]{16,64}$/i.test(String(itemId || ''))) throw new Error('Identifiant Jellyfin invalide');
   launch('jellyfin'); const view = views.get('jellyfin');
-  const trigger = () => view.webContents.executeJavaScript(`typeof play==='function'&&play(${JSON.stringify(String(itemId))})`, true).catch(() => {});
-  const current = view.webContents.getURL();
-  if (current.includes(SITE.lumoPath.split('#')[0])) trigger(); else { await view.webContents.loadURL(`${JELLYFIN}${SITE.lumoPath}`); trigger(); }
+  await viewLoads.get(view);
+  if (view.webContents.isDestroyed()) return false;
+  const serverId = jellyfinVault?.serverId ? `&serverId=${encodeURIComponent(jellyfinVault.serverId)}` : '';
+  const route = `#/details?id=${String(itemId)}${serverId}`;
+  // Jellyfin has no autoplay route: open the item page, then press its play button, which also handles resume.
+  view.webContents.executeJavaScript(`(()=>{location.hash=${JSON.stringify(route)};const route=location.hash,started=Date.now();return new Promise(done=>{const attempt=()=>{if(location.hash!==route)return done(false);const button=[...document.querySelectorAll('.itemDetailPage:not(.hide) .btnPlay')].find(item=>item.offsetParent&&!item.classList.contains('hide'));if(button){button.click();return done(true)}if(Date.now()-started>15000)return done(false);setTimeout(attempt,200)};setTimeout(attempt,500)})})()`, true).catch(error => log(`jellyfin play failure ${error.message}`));
   return true;
 }
 function closeService(serviceId, options = {}) { const view = views.get(serviceId); if (!view) return; mainWindow.contentView.removeChildView(view); view.webContents.close(); views.delete(serviceId); viewLastUsed.delete(serviceId); if (activeId === serviceId) showHome(); log(`closed ${serviceId}${options.reason ? ` (${options.reason})` : ''}`); if (!options.silent) emitState(); }

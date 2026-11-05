@@ -1,7 +1,5 @@
 {
   "jellyfinUrl": "http://jellyfin.local:8096",
-  "jellyfinRemoteUrl": "",
-  "lumoPath": "/web/cinematic/index.html#home",
   "moonlightHost": "",
   "dashboardUrl": "",
   "immichUrl": "",
