@@ -1,0 +1,17 @@
+# Modèle : install.sh remplace @APP_DIR@ par le dossier du dépôt et l'installe dans ~/.config/systemd/user/.
+[Unit]
+Description=RaspyTV, interface de la TV
+# Au-delà de 10 échecs en 2 minutes, systemd arrête d'insister : l'erreur est alors durable.
+StartLimitIntervalSec=120
+StartLimitBurst=10
+
+[Service]
+WorkingDirectory=@APP_DIR@
+# Sans session graphique, inutile de lancer Electron : il échouerait en boucle.
+ExecStartPre=/bin/sh -c 'test -S "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"'
+# Electron directement, sans npm : un processus de moins et environ 65 Mo de mémoire libérés.
+ExecStart=@APP_DIR@/node_modules/electron/dist/electron @APP_DIR@ --ozone-platform=wayland
+# Relancé quelle que soit la cause de l'arrêt : la TV ne reste jamais sans interface.
+Restart=always
+RestartSec=2
+TimeoutStopSec=10

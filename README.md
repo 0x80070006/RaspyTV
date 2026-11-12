@@ -1,68 +1,101 @@
 # RaspyTV
 
-Interface Smart TV pour Raspberry Pi 4, construite avec Electron. Elle démarre en kiosque plein écran au lancement de la session graphique (labwc / Wayland) et sert de page d'accueil au salon : médiathèque Jellyfin, services de streaming, jeux Moonlight et réglages du système, le tout pilotable à la télécommande, au clavier ou à la manette.
+Interface Smart TV pour Raspberry Pi 4, construite avec Electron. Elle démarre en kiosque plein écran avec la session graphique (labwc / Wayland) et sert d'accueil au salon. On y trouve la médiathèque Jellyfin, YouTube et YouTube Music sans publicité (NouTube), Twitch, Immich, les jeux du PC via Moonlight et les réglages du système. Tout se pilote à la télécommande, au clavier ou à la manette PS4.
 
 ![Accueil RaspyTV](docs/screenshots/accueil.png)
 
-> Les captures de l'interface utilisent des films, séries et jeux fictifs (`demo.html`), pas une vraie médiathèque.
+> 📖 **Documentation complète : [wiki RaspyTV](https://github.com/0x80070006/RaspyTV/wiki)**. Elle couvre l'installation, chaque écran en détail, la manette, la configuration et le dépannage.
+
+## Sommaire
+
+- [Fonctionnalités](#fonctionnalités)
+- [Visite guidée](#visite-guidée)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Commandes](#commandes)
+- [Architecture](#architecture)
+- [Licences](#licences)
 
 ## Fonctionnalités
 
-- **Accueil cinéma** : bandeau des films de la médiathèque Jellyfin (7 titres tirés au sort chaque jour, défilement automatique), rangées « Continuer » (avec la progression de lecture) et « Récemment ajoutés », lecture directe depuis l'accueil.
-- **Tuiles uniformes** : « Continuer », « Récemment ajoutés », applications et jeux partagent une même case 16:9, cinq par ligne. Chaque service affiche son logo complet sur la couleur de sa marque, et un point vert signale une application déjà ouverte.
-- **Applications persistantes** : Jellyfin, YouTube, Spotify, Twitch, Netflix, un dashboard et Immich s'ouvrent chacun dans leur propre vue, avec leur session conservée. Les applications les moins récentes sont fermées au-delà d'une limite réglable (2 à 6) pour ménager la mémoire du Pi.
-- **Raccourcis personnalisés** : ajout d'un site par son URL, icône récupérée automatiquement.
-- **Jeux Moonlight** : liste des jeux publiés par le PC (Sunshine / GameStream) et lancement natif de `moonlight-qt`, avec clavier virtuel pendant le stream.
-- **Barre latérale** : invisible au repos, elle se déplie quand le pointeur touche le bord gauche de l'écran et reste au-dessus de toutes les applications (accueil, applications, Moonlight, volume, paramètres).
-- **Mode Tableau** : diaporama plein écran d'images, pour quand la TV ne sert pas.
-- **Réglages** : thème, arrière-plan (couleur, image ou vidéo), météo, horloge, sortie et volume audio (PipeWire / PulseAudio), informations système, redémarrage et extinction.
-- **Navigation TV** : flèches avec déplacement spatial entre les éléments, `Entrée` pour valider, `Échap` pour revenir, manette compatible (A / B / croix directionnelle).
+- **Accueil cinéma.** Un bandeau présente chaque jour 7 films de la médiathèque Jellyfin tirés au sort, avec défilement automatique et lecture directe. Viennent ensuite les rangées « Continuer », avec la progression de lecture, et « Récemment ajoutés ».
+- **Applications persistantes.** Jellyfin, NouTube, NouTube Music, Twitch, un tableau de bord et Immich s'ouvrent chacun dans leur propre vue et gardent leur session. Au-delà d'une limite réglable (2 à 6), les applications les moins récentes sont fermées pour ménager la mémoire du Pi.
+- **NouTube intégré.** YouTube et YouTube Music sans publicité, avec les Shorts masqués et SponsorBlock. La musique continue pendant qu'on navigue ailleurs.
+- **Jeux Moonlight.** La rangée « Jeux » liste les jeux publiés par le PC (Sunshine / GameStream) et les lance dans `moonlight-qt`.
+- **Barre latérale.** Invisible au repos, elle passe au-dessus de toutes les applications. Elle s'ouvre quand le pointeur touche le bord gauche ou depuis la manette (Share).
+- **Panneau rapide (PS maintenu).** Il réunit la lecture en cours (jaquette, barre de lecture, précédent / lecture / suivant), le volume, la sortie audio (casques Bluetooth compris), l'état de la manette et l'alimentation du Pi.
+- **Paramètres en onglets.** Affichage, Accueil, Son, Applications, Système. Tout se règle à la croix directionnelle.
+- **Alimentation sécurisée.** Redémarrer et Éteindre demandent toujours une confirmation, et le focus est placé sur « Annuler ».
+- **Mode Tableau.** Diaporama plein écran pour quand la TV ne sert pas.
 
-<p align="center">
-  <img src="docs/screenshots/barre-laterale.png" alt="Barre latérale dépliée" height="420">
-</p>
+## Visite guidée
 
-![Page d'accueil complète](docs/screenshots/accueil-complet.png)
+### Accueil, applications et jeux
 
-![Paramètres](docs/screenshots/parametres.png)
+![Applications et jeux](docs/screenshots/accueil-applications-jeux.png)
 
-## Architecture
+Toutes les tuiles ont le même format 16:9, cinq par ligne. Chaque service affiche son logo sur sa couleur de marque, et « Ajouter un raccourci » crée une tuile vers n'importe quel site. La rangée **Jeux** vient de Moonlight.
 
-| Fichier | Rôle |
+### Barre latérale
+
+<p align="center"><img src="docs/screenshots/barre-laterale.png" alt="Barre latérale dépliée" width="720"></p>
+
+Elle propose Accueil, Apps, Raccourcis, Jeux, le volume (− / +) et Réglages. Elle se replie seule après 4 s sans action à la manette, ou 6 s sans mouvement de souris, même si le pointeur reste posé sur le bord.
+
+### Panneau rapide
+
+![Panneau PS](docs/screenshots/panneau-ps.png)
+
+Le panneau s'ouvre en maintenant **PS** une seconde, et un voile assombrit l'écran derrière lui. Il comporte deux cartes :
+
+- **à gauche**, la lecture en cours (NouTube Music en priorité, même depuis l'accueil), le volume et les sorties audio ;
+- **à droite**, la manette (batterie, extinction) et l'alimentation du Raspberry Pi.
+
+![Confirmation d'alimentation](docs/screenshots/panneau-ps-alimentation.png)
+
+« Alimentation » propose **Éteindre le Raspberry Pi**, **Redémarrer** ou **Annuler**, et le focus part toujours sur Annuler.
+
+### Paramètres
+
+| Affichage | Accueil |
 | --- | --- |
-| `main.js` | Processus principal Electron : fenêtre kiosque, vues des applications, session Jellyfin, Moonlight, audio, météo, IPC. |
-| `preload.js` | Pont `window.raspy` exposé à l'interface (isolation de contexte activée). |
-| `index.html`, `renderer.js`, `style.css`, `layout-override.css` | Accueil et paramètres. |
-| `gallery.js`, `gallery.css` | Mode Tableau. |
-| `keyboard.html`, `keyboard.js`, `keyboard.css` | Clavier virtuel pour les champs de saisie des applications web. |
-| `layer-nav.py` | Barre latérale en GTK layer-shell (couche overlay Wayland), reliée à Electron par un socket Unix. |
-| `moonlight-kiosk-setup.py` | Prépare Moonlight (fenêtré sans bordure, souris non capturée) et ajoute une règle labwc, avec sauvegarde des fichiers d'origine. |
-| `start-kiosk.sh` | Boucle de lancement : relance l'interface après un plantage, s'arrête sur une sortie normale. |
-| `labwc-autostart` | Exemple d'autostart labwc qui lance directement RaspyTV. |
-| `demo.html`, `demo/mock-raspy.js` | Aperçu de l'interface dans un navigateur, avec des données fictives. |
+| ![Affichage](docs/screenshots/parametres-affichage.png) | ![Accueil](docs/screenshots/parametres-accueil.png) |
+| **Son** | **Applications** |
+| ![Son](docs/screenshots/parametres-son.png) | ![Applications](docs/screenshots/parametres-applications.png) |
+| **Système** | **Confirmation** |
+| ![Système](docs/screenshots/parametres-systeme.png) | ![Confirmation](docs/screenshots/confirmation-alimentation.png) |
 
-Les sites sont chargés dans des vues isolées (`sandbox`, `contextIsolation`, pas de `nodeIntegration`), les pop-ups sont bloquées et seule la permission plein écran est accordée. Chaque appel IPC vérifie la fenêtre qui l'envoie.
+À la croix directionnelle, haut et bas restent dans la colonne (onglets ou réglages). La flèche droite entre dans le réglage en face, et la flèche gauche revient à l'onglet actif.
+
+> Les captures viennent d'un vrai Raspberry Pi. Les éléments personnels (nom de machine, noms des casques, raccourci privé) sont floutés.
 
 ## Installation
 
-Prérequis sur Raspberry Pi OS (Bookworm, session labwc) :
+Sur Raspberry Pi OS Bookworm (session labwc) :
 
 ```bash
-sudo apt install nodejs npm python3-gi gir1.2-gtk-3.0 gir1.2-gtklayershell-0.1 squeekboard swaybg kanshi
-# optionnel : moonlight-qt pour les jeux, grim pour les captures
-```
-
-Puis :
-
-```bash
+sudo apt install nodejs npm
 git clone https://github.com/0x80070006/RaspyTV.git ~/MediaHub
 cd ~/MediaHub
 ./install.sh
 ```
 
-`install.sh` installe les dépendances, ajoute l'entrée d'autostart et crée `~/.config/raspy-tv/site.json` à partir de `site.example.json`. Pour une session dédiée uniquement à RaspyTV, copier `labwc-autostart` vers `~/.config/labwc/autostart`.
+`install.sh` effectue ces étapes :
 
-Lancement manuel : `npm start`.
+- il installe les dépendances : GTK layer-shell, `pactl`, `bluetoothctl`, `playerctl`, `swaybg`, `kanshi`, `grim` et Electron ;
+- il installe le service utilisateur `raspytv.service` ;
+- il ajoute l'autostart ;
+- il crée `~/.config/raspy-tv/site.json` à partir de `site.example.json`.
+
+Pour une session dédiée à RaspyTV, copiez `labwc-autostart` vers `~/.config/labwc/autostart`. Pour les jeux, installez aussi `moonlight-qt`.
+
+```bash
+systemctl --user start raspytv       # démarrer
+systemctl --user restart raspytv     # après une modification
+tail -f ~/.config/raspy-tv/logs/raspy-tv.log
+```
+
+Le détail, avec la règle sudo pour l'alimentation et le dépannage, est dans le wiki : [Installation](https://github.com/0x80070006/RaspyTV/wiki/Installation).
 
 ## Configuration
 
@@ -70,34 +103,52 @@ Les adresses réseau et la localisation ne sont pas dans le code. Elles se règl
 
 | Clé | Rôle |
 | --- | --- |
-| `jellyfinUrl` | Serveur Jellyfin sur le réseau local (accueil, « Continuer », lecture). |
-| `moonlightHost` | Adresse du PC de jeu ; vide pour désactiver les jeux. |
+| `jellyfinUrl` | Serveur Jellyfin (accueil, « Continuer », lecture). |
+| `moonlightHost` | Adresse du PC de jeu ; vide pour masquer les jeux. |
 | `dashboardUrl`, `immichUrl` | Tuiles facultatives ; une URL vide masque la tuile. |
-| `weatherLatitude`, `weatherLongitude`, `weatherLabel`, `timezone` | Météo Open-Meteo et fuseau horaire. |
+| `weatherLatitude`, `weatherLongitude`, `weatherLabel`, `timezone` | Météo Open-Meteo, nom de la ville affiché et fuseau horaire. |
 
-Les réglages de l'interface, le cache d'icônes, la session Jellyfin et les journaux sont rangés dans `~/.config/raspy-tv/` (droits `0700` / `0600`). La session Jellyfin est chiffrée avec `safeStorage` quand un trousseau est disponible.
+Les réglages de l'interface, le cache, la session Jellyfin et les journaux sont rangés dans `~/.config/raspy-tv/`.
 
-**Arrière-plans et Mode Tableau** : aucun média n'est fourni. Déposer des vidéos MP4 silencieuses (720p / 24 i/s recommandé sur Pi 4) dans `assets/backgrounds/` et les déclarer dans `backgrounds` en haut de `renderer.js` ; déposer des images dans `assets/art/` et les lister dans `gallery.js`.
-
-**Redémarrer / Éteindre** utilisent `sudo -n systemctl reboot|poweroff` et demandent une règle sudo explicite, par exemple dans `/etc/sudoers.d/raspytv` :
+**Redémarrer / Éteindre** passent par `sudo -n systemctl reboot|poweroff` et demandent une règle sudo explicite, par exemple dans `/etc/sudoers.d/raspytv` :
 
 ```
 <utilisateur> ALL=(root) NOPASSWD: /usr/bin/systemctl reboot, /usr/bin/systemctl poweroff
 ```
 
-## Raccourcis
+## Commandes
 
 | Touche | Action |
 | --- | --- |
-| `Home` ou `Ctrl+Alt+H` | Retour à l'accueil |
-| `Échap` | Retour depuis une application ou fermeture d'une fenêtre |
 | Flèches, `Entrée` | Navigation et validation |
+| `Échap` | Retour, fermeture d'une fenêtre |
+| `Home` ou `Ctrl+Alt+H` | Accueil |
 | `Ctrl+Alt+Shift+Q` | Quitter RaspyTV |
 
-## Aperçu sans Raspberry Pi
+La manette PS4 est gérée par le service [TelecomHand](https://github.com/0x80070006/TelecomHand) : PS, Share, Options, L1/R1 pour le volume, L2/R2 pour changer de titre. La correspondance complète est dans le wiki : [Manette](https://github.com/0x80070006/RaspyTV/wiki/Manette).
 
-Ouvrir `demo.html` dans Chrome ou Edge : l'interface se charge avec `demo/mock-raspy.js`, qui remplace le pont Electron par des données fictives. Ajouter `?page=settings` à l'URL pour afficher les paramètres.
+D'autres programmes peuvent piloter RaspyTV par le socket `$XDG_RUNTIME_DIR/raspytv-nav.sock` (JSON) : voir le wiki, [Socket de commande](https://github.com/0x80070006/RaspyTV/wiki/Socket-de-commande).
 
-## Licences des ressources
+## Architecture
 
-Les polices DM Sans et Space Grotesk sont distribuées sous licence SIL Open Font. Les logos des services (YouTube, Spotify, Twitch, Netflix, Jellyfin, Immich, Dashy) appartiennent à leurs propriétaires respectifs et ne servent qu'à identifier les tuiles. Les logos complets de `assets/logos/` proviennent de Wikimedia Commons (YouTube, Netflix, Spotify, Twitch) et des dépôts officiels des projets : Jellyfin (`jellyfin/jellyfin-ux`, CC BY-SA 4.0) et Immich (`immich-app/immich`). Les logos Spotify et Twitch ont été recolorés pour leur fond de marque.
+| Fichier | Rôle |
+| --- | --- |
+| `main.js` | Processus principal Electron : fenêtre kiosque, vues des applications, Jellyfin, NouTube, Moonlight, audio, météo, socket de commande. |
+| `preload.js` | Pont `window.raspy` exposé à l'interface (isolation de contexte). |
+| `index.html`, `renderer.js`, `style.css`, `layout-override.css` | Accueil et paramètres. |
+| `tv-input-adapter.js` | Navigation à la croix directionnelle dans les sites web. |
+| `layer-nav.py` | Barre latérale, indicateur de volume et panneau PS en GTK layer-shell (couche overlay Wayland). |
+| `noutube-preload.js`, `noutube/` | Script NouTube (AGPL-3.0) injecté dans YouTube et YouTube Music. |
+| `nav.*`, `edge.html`, `moonlight-overlay.*`, `overlay-preload.js` | Détection du bord d'écran et surcouche pendant Moonlight. |
+| `gallery.*`, `keyboard.*` | Mode Tableau et clavier virtuel. |
+| `raspytv.service`, `start-kiosk.sh`, `labwc-autostart` | Démarrage et relance automatique. |
+| `demo.html`, `demo/mock-raspy.js` | Aperçu de l'accueil dans un navigateur, avec des données fictives. |
+
+Les sites sont chargés dans des vues isolées (`sandbox`, `contextIsolation`, sans `nodeIntegration`), les pop-ups sont bloquées et chaque appel IPC vérifie la fenêtre qui l'envoie. Le détail est dans le wiki : [Architecture](https://github.com/0x80070006/RaspyTV/wiki/Architecture).
+
+## Licences
+
+- `noutube/noutube-content.js` vient de [NouTube](https://github.com/nonbili/NouTube) et reste sous licence **AGPL-3.0** (voir `noutube/LICENSE`).
+- Les polices DM Sans et Space Grotesk sont sous licence SIL Open Font.
+- Les logos des services appartiennent à leurs propriétaires et servent uniquement à identifier les tuiles. Les logos complets viennent de Wikimedia Commons et des dépôts officiels de Jellyfin (CC BY-SA 4.0) et d'Immich.
+- Les affiches visibles sur les captures appartiennent à leurs ayants droit.

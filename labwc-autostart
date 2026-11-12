@@ -5,4 +5,7 @@
 RASPYTV_DIR="${RASPYTV_DIR:-$HOME/MediaHub}"
 /usr/bin/swaybg -i "$RASPYTV_DIR/assets/raspytv-boot.png" -m fill &
 /usr/bin/kanshi &
-"$RASPYTV_DIR/start-kiosk.sh" &
+# RaspyTV tourne comme service utilisateur, relancé quoi qu'il arrive.
+# Si le service ne peut pas démarrer, le script de lancement prend le relais.
+systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE
+(systemctl --user start raspytv.service || "$RASPYTV_DIR/start-kiosk.sh") &

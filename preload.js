@@ -14,6 +14,9 @@ contextBridge.exposeInMainWorld('raspy', {
   stats: () => ipcRenderer.invoke('system:stats'),
   systemAction: (action) => ipcRenderer.invoke('system:action', action),
   home: () => ipcRenderer.invoke('home:show'),
+  tvSettings: () => ipcRenderer.invoke('tv:settings'),
+  shellPage: (value) => ipcRenderer.send('shell:page', value),
+  onTvBack: (fn) => ipcRenderer.on('tv-back', () => fn()),
   jellyfinHero: (force = false) => ipcRenderer.invoke('jellyfin:hero', force === true),
   playJellyfin: (id) => ipcRenderer.invoke('jellyfin:play', id),
   networkStatus: () => ipcRenderer.invoke('network:status'),
@@ -30,6 +33,7 @@ contextBridge.exposeInMainWorld('raspy', {
   onNavVisible: (fn) => ipcRenderer.on('nav:visible', (_e, value) => fn(value)),
   onState: (fn) => ipcRenderer.on('state:changed', (_e, value) => fn(value)),
   onNavigate: (fn) => ipcRenderer.on('navigate', (_e, value) => fn(value)),
+  onAudioChanged: (fn) => ipcRenderer.on('audio:changed', () => fn()),
   onToast: (fn) => ipcRenderer.on('toast', (_e, value) => fn(value))
 });
 

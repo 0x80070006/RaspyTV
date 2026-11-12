@@ -3,6 +3,11 @@
   "version": "2.0.0",
   "private": true,
   "main": "main.js",
-  "scripts": { "start": "electron . --ozone-platform=wayland" },
-  "devDependencies": { "electron": "^37.0.0" }
+  "scripts": {
+    "start": "electron . --ozone-platform=wayland",
+    "test": "electron . --smoke-test --ozone-platform=wayland"
+  },
+  "devDependencies": {
+    "electron": "45.3.0"
+  }
 }
