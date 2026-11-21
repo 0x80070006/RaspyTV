@@ -148,6 +148,7 @@ Les sites sont chargés dans des vues isolées (`sandbox`, `contextIsolation`, s
 
 ## Licences
 
+- Le code de RaspyTV est sous licence **MIT** (voir [`LICENSE`](LICENSE)), sauf les éléments tiers ci-dessous.
 - `noutube/noutube-content.js` vient de [NouTube](https://github.com/nonbili/NouTube) et reste sous licence **AGPL-3.0** (voir `noutube/LICENSE`).
 - Les polices DM Sans et Space Grotesk sont sous licence SIL Open Font.
 - Les logos des services appartiennent à leurs propriétaires et servent uniquement à identifier les tuiles. Les logos complets viennent de Wikimedia Commons et des dépôts officiels de Jellyfin (CC BY-SA 4.0) et d'Immich.
