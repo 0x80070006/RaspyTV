@@ -4,6 +4,8 @@ Interface Smart TV pour Raspberry Pi 4, construite avec Electron. Elle démarre 
 
 ![Accueil RaspyTV](docs/screenshots/accueil.png)
 
+> 🦀 **Version Rust** : une réécriture complète en Rust (tao + wry, accueil en WebAssembly) est disponible dans [RaspyTV-remake-rust](https://github.com/0x80070006/RaspyTV-remake-rust). Cette version Electron reste la version principale.
+
 > 📖 **Documentation complète : [wiki RaspyTV](https://github.com/0x80070006/RaspyTV/wiki)**. Elle couvre l'installation, chaque écran en détail, la manette, la configuration et le dépannage.
 
 ## Sommaire
